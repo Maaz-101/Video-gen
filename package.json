@@ -1,0 +1,13 @@
+{
+  "name": "leo-automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "discover": "node 1-discover-network.js",
+    "generate": "node 2-generate-automation.js"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}

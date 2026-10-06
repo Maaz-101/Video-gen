@@ -1,0 +1,12 @@
+# Ignore all media files
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.wav
+*.mp3
+
+# Ignore generated outputs and heavy library folders
+outputs/
+outputs_video/
+node_modules/

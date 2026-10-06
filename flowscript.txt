@@ -1,0 +1,515 @@
+(async function runFlowQueueWithAutoSkip() {
+  // ---------------------------------------------------------------------
+  // 1. SCENES CONFIGURATION
+  // ---------------------------------------------------------------------
+  const SCENES = [
+    {
+      id: "scene_01",
+      prompt: "A completely ordinary suburban family house at night, built in 2004, beige exterior, simple two-story architecture, quiet residential street, a few neighboring houses barely visible in the darkness. The house should initially look normal and forgettable, but the atmosphere feels subtly wrong and unsettling. One upstairs bedroom window has a very faint warm light glowing behind the curtains, while the rest of the house is almost completely dark. Empty street, no people, no cars, no visible supernatural creature. Deep shadows around the house, slightly overgrown grass, bare tree branches casting strange angular shadows across the exterior walls. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn textures, gritty pencil-and-ink shading, limited-animation aesthetic, flat layered shadows with subtle depth, intentionally imperfect artwork, cinematic horror composition, muted dark tones, eerie nighttime lighting, atmospheric grain, unsettling visual storytelling, mature horror mood, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_02",
+      prompt: "Same beige suburban house, same architecture and nighttime setting, but now viewed from a slightly closer and lower angle. The house still appears completely normal at first glance, yet the atmosphere feels subtly disturbing. The upstairs bedroom window with the faint warm light is now more prominent, curtains slightly parted as if someone is standing behind them, but no person is visible. The neighboring houses disappear deeper into darkness, the street is completely empty, tree branches create sharp distorted shadows across the house, and a few sections of the exterior seem unnaturally darker than they should be. The composition should make the viewer instinctively feel that something is watching from inside the house without showing what it is. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, subtle atmospheric grain, cinematic horror framing, muted dark tones, oppressive shadows, eerie nighttime lighting, unsettling but restrained horror, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_03",
+      prompt: "Interior of Emma’s bedroom at night, same house and visual style. A small seven-year-old girl, Emma, stands completely motionless in the far corner of her bedroom, facing directly toward the plain beige wall with her back to the viewer. Her posture is unnaturally straight and rigid, arms hanging loosely at her sides. The room looks like a normal child’s bedroom with a small bed, simple furniture, toys and scattered belongings, but everything feels unnaturally still. A faint cold moonlight enters through the window while a weak warm light from the hallway barely illuminates the room. Emma’s shadow stretches across the wall in an oddly elongated shape that doesn't quite match her body. Keep her face completely hidden. The wall in front of her looks normal for now, with only a subtle suggestion of darkness around the corner. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic composition, atmospheric grain, deep shadows, muted dark colors, unsettling silence and psychological horror, subtle supernatural feeling without revealing the entity, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_04",
+      prompt: "Interior of the same beige suburban house during daytime, shortly after the family has moved in. Moving boxes are scattered throughout the living room and hallway, some still sealed, some opened with household items visible. A mother and father are unpacking and arranging furniture while seven-year-old Emma quietly stands a short distance away, watching the house rather than helping. Emma looks small and withdrawn, holding a simple toy loosely in one hand. Sunlight enters through the windows, making the scene appear completely ordinary, but Emma is positioned partly in shadow and seems disconnected from the cheerful moving activity around her. The hallway leading toward Emma’s future bedroom appears unusually dark and visually draws attention. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic composition, muted natural tones with subdued lighting, subtle unsettling atmosphere beneath an otherwise normal family scene, psychological horror, no supernatural creature, no exaggerated horror yet, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_05",
+      prompt: "Interior of Emma’s bedroom late at night, same room and architecture established in previous scenes. Emma, seven years old, stands alone in the far corner facing the wall, completely motionless. The bedroom is almost entirely dark, illuminated only by faint blue-gray moonlight coming through the window. Her small bed, toys, and furniture are barely visible in the surrounding darkness. Her posture is unnaturally rigid, head slightly tilted toward the wall as if she is quietly listening to something on the other side. The wall in front of her remains completely normal, but the darkness around Emma feels unnaturally heavy. A narrow strip of hallway light spills beneath the partially open bedroom door behind her. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, deep shadows, muted dark blue and brown tones, subtle unsettling atmosphere, psychological horror, no visible creature, no gore, no exaggerated supernatural effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, maintain exact character and room continuity, widescreen 16:9."
+    },
+    {
+      id: "scene_06",
+      prompt: "Interior of Emma’s bedroom late at night. Emma is still standing in the corner facing the wall, completely motionless, while her mother has quietly entered the bedroom and stands several steps behind her, confused and concerned. The mother is seen from behind or in partial silhouette, one hand slightly raised as if about to speak. Emma’s head remains turned toward the wall, suggesting she is talking to something on the other side rather than acknowledging her mother. The bedroom is dimly illuminated by cold moonlight and a faint hallway glow. The wall in front of Emma appears ordinary, but a subtle unnatural darkness seems to gather around the exact spot where she is looking. The mother’s body language should communicate confusion slowly turning into fear. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror framing, deep oppressive shadows, muted nighttime colors, psychological horror, restrained supernatural atmosphere, no creature visible, no gore, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_07",
+      prompt: "Same Emma’s bedroom, same night. Emma remains standing close to the wall with her back toward her mother, but her head is now turned slightly toward the mother as if answering her without fully turning around. The mother stands several feet behind her, visibly confused and uneasy. Emma’s small hand is slowly raised and pointing toward a specific section of the wall directly in front of her. The wall looks completely solid and ordinary, but the area she points toward is unnaturally dark compared with the rest of the room. The mother’s face should show growing concern, while Emma’s expression is mostly hidden in profile and shadow. Keep the scene restrained and believable, with the horror coming from Emma’s unnatural stillness and the suggestion that she knows something is behind the wall. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic composition, deep shadows, muted nighttime colors, subtle psychological horror, eerie atmosphere, no visible creature, no cracks yet, no gore, no exaggerated supernatural effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_08",
+      prompt: "Same Emma’s bedroom, same night. Emma is now slightly turned toward her mother, revealing only part of her face in the dim light. Her expression is strangely calm and emotionless, completely inappropriate for a frightened child. One small hand remains pressed flat against the wall, as though she can feel something moving behind it. The mother stands several feet away, frozen and visibly disturbed. Emma’s lips are slightly parted as if quietly telling her mother that the room behind the wall is warm and wants her to come inside. The wall itself remains intact and completely ordinary, but beneath Emma’s hand there is an extremely subtle dark discoloration, almost like warmth or moisture trapped underneath the paint. Keep the supernatural element ambiguous and barely visible. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror framing, oppressive shadows, muted blue-gray nighttime palette, eerie psychological horror, unsettling childlike innocence contrasted with something deeply wrong, no visible creature, no cracks yet, no gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_09",
+      prompt: "Same Emma’s bedroom, same night. Emma slowly turns her entire body away from the wall for the first time and faces her mother. Her expression is unnervingly calm, with a faint unnatural smile that does not look like a normal child’s smile. Her eyes appear slightly darker than before, with the surrounding shadows making them seem almost black, but keep the transformation subtle at this stage. The mother stands frozen several feet away, staring at Emma with growing fear. Emma’s hand is still touching the wall behind her. The bedroom remains quiet and dim, with cold moonlight from the window and a thin strip of hallway light behind the mother. The wall looks normal, yet the shadow directly behind Emma is slightly distorted, as if something much larger is standing where her shadow should be. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, deep oppressive shadows, muted blue-gray and brown tones, subtle supernatural horror, unsettling childlike expression, disturbing but restrained, no creature fully visible, no gore, no exaggerated monster features, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_10",
+      prompt: "Same Emma’s bedroom, same night. Emma stands facing her mother with that faint, unnatural smile, but now she slowly raises one finger and points toward the wall behind herself. Her eyes are almost completely swallowed by darkness. The mother remains frozen in place, her expression shifting from confusion into genuine fear. The room around them feels unnaturally still. Behind Emma, the wall is still intact, but a very thin, almost invisible black line has appeared vertically through the paint exactly where Emma is pointing, subtle enough that the mother might not notice it immediately. A faint darkness seems to seep outward from the line. Emma's posture is calm and confident, as if she knows exactly what is waiting behind the wall. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, deep oppressive shadows, muted blue-gray nighttime tones, disturbing psychological horror, subtle supernatural details, eerie childlike innocence contrasted with something deeply wrong, no visible creature, no gore, no exaggerated monster design, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_11",
+      prompt: "Same Emma’s bedroom. Emma stands beside the wall, still pointing toward the thin black line. Her mother has taken one cautious step backward, staring at the wall in disbelief. The black line is now slightly more visible, running vertically from near the floor to about halfway up the wall, but it still looks impossible and unnatural rather than like an ordinary crack. The room feels darker than before, with the corners almost completely swallowed by shadow. Behind Emma, her shadow stretches unnaturally toward the ceiling and appears slightly separated from her body. Emma remains completely calm, her faint smile unchanged. The mother should look genuinely frightened, as if she is beginning to realize that Emma wasn't imagining anything. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, oppressive darkness, muted blue-gray and brown nighttime palette, subtle supernatural horror, escalating tension, disturbing environmental details, no creature visible yet, no gore, no exaggerated monster features, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_12",
+      prompt: "Same Emma’s bedroom, later that night. The room is now darker, with only faint moonlight illuminating Emma’s bedroom. Emma is no longer pointing; she stands close to the wall with her head lowered, one hand pressed against it. Her mother stands in the doorway watching her cautiously, unable to understand what she is doing. The thin black line has become slightly longer and more defined, extending toward the floor. Emma’s fingers are beginning to drag slowly across the wall, leaving faint scratch marks in the paint. Her posture remains unnaturally calm and deliberate. The mother’s face shows growing fear as she realizes Emma is responding to something behind the wall. Add subtle dark shadows around the crack, as though the darkness itself is spreading. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, oppressive nighttime darkness, muted blue-gray and brown tones, disturbing psychological horror, escalating supernatural tension, subtle environmental horror, no creature visible yet, no gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_13",
+      prompt: "Same Emma’s bedroom. Emma is now aggressively scratching at the wall with both hands, her small fingernails scraped and bleeding, leaving long uneven marks across the beige paint. Several fresh scratches surround the thin black crack, which has now extended almost from the floor to the ceiling. Emma’s face is partially visible in profile, completely emotionless and focused only on the wall. Her mother has rushed into the room and is reaching toward Emma from behind, horrified and desperate to stop her. Small drops of blood are visible on the floor beneath Emma’s hands. The wall around the crack appears slightly warped, as though something enormous is pressing against it from the other side. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, dramatic shadows, muted dirty beige, blue-gray and dark brown tones, disturbing body horror, escalating fear, visceral but not excessively graphic, no creature fully revealed, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_14",
+      prompt: "Same Emma’s bedroom. Emma’s mother has grabbed Emma firmly around the shoulders and is pulling her away from the wall, desperately trying to stop her from scratching. Emma’s arms remain stretched toward the wall as if she is resisting being taken away, her face completely blank and emotionless. Her bloody fingertips leave several thin red streaks across the beige wall. The vertical black crack is now clearly visible from near the floor toward the ceiling, unnaturally straight and impossibly dark. The mother looks terrified and confused, while Emma appears strangely calm, as though she is listening to something inside the wall. Behind the crack, there is no visible creature yet, only absolute darkness. A faint unnatural bulge presses outward from one section of the wall near Emma’s hand, suggesting something is pushing from the other side. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, strong contrast between the frightened mother and emotionless child, oppressive shadows, muted dirty beige, dark brown and blue-gray tones, visceral psychological horror, escalating supernatural tension, subtle body horror, no fully revealed monster, no excessive gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_15",
+      prompt: "Same Emma’s bedroom. The mother has managed to pull Emma several steps away from the wall and is holding her tightly, while Emma remains unnaturally calm, staring past her mother toward the wall. The vertical black crack has now changed into something unmistakably unnatural: the crack has widened slightly and formed the rough outline of a tall, narrow doorway within the wall, but the interior is completely black and impossible to see through. The edges of the opening are jagged and irregular, as if the wall itself has split open. A faint darkness seems to spill onto the floor from inside the opening. The mother stares at it in horror while Emma looks at it with quiet familiarity, as though she has been waiting for this moment. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, strong perspective toward the impossible doorway, deep oppressive shadows, muted dirty beige, charcoal black, dark blue-gray tones, terrifying supernatural atmosphere, environmental horror, restrained but visually chilling, no creature visible yet, no excessive gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_16",
+      prompt: "Same Emma’s bedroom. The mother stands frozen while holding Emma close, both staring toward the newly opened, impossibly dark doorway in the wall. The doorway has widened slightly, revealing a completely black space beyond it. From deep inside the darkness, a pale, unnaturally thin hand with far too many long fingers is barely emerging through the opening, its fingertips resting against the edge of the doorway. Only part of the hand is visible; the rest disappears into darkness. Emma watches the hand without fear, almost with recognition, while her mother’s expression shows pure terror. The blackness behind the doorway should feel much deeper than the physical space of the bedroom, as if it leads somewhere impossible. Long distorted shadows stretch across the floor toward the mother and Emma. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, extremely deep blacks, muted dirty beige and blue-gray tones, disturbing supernatural body horror, visually chilling but not excessively graphic, unsettling elongated fingers, oppressive atmosphere, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_17",
+      prompt: "Same Emma’s bedroom. The mother has pulled Emma farther away from the wall, but both remain staring at the impossible doorway. The pale hand with far too many long fingers has now reached farther out from the darkness, its thin fingers curling slowly around the jagged edge of the opening. A second distorted finger-like shape is barely visible deeper inside the doorway, suggesting that the hand belongs to something much larger. Emma remains eerily calm, staring directly into the darkness, while her mother shields Emma with one arm and backs away in terror. The darkness inside the doorway appears unnaturally deep, with no visible back wall or interior space. The bedroom furniture and toys remain normal, creating a disturbing contrast with the impossible opening. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, extreme contrast between ordinary bedroom and supernatural doorway, elongated unnatural fingers, oppressive shadows, muted dirty beige, charcoal black and blue-gray tones, visceral supernatural horror, visually disturbing and chilling, no excessive gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_18",
+      prompt: "Same Emma’s bedroom. The mother is pulling Emma backward toward the doorway, while the father has stepped closer to the impossible opening in the wall, unable to resist looking inside. He stands cautiously at the edge of the doorway, leaning forward slightly, his face partially illuminated by the unnatural darkness. The pale hand with too many long fingers has disappeared back into the darkness, leaving the doorway seemingly empty. The father peers into the black space and sees only a faint, pale distorted silhouette deep inside, barely recognizable and partially hidden by darkness. Several long, thin shapes appear to be hanging from the darkness above, but their exact nature is impossible to identify. The mother looks toward him in panic, silently urging him to step away. Emma remains strangely calm in her mother’s arms, staring directly into the opening as if she knows what the father is seeing. The impossible doorway should feel far deeper than the bedroom could physically allow. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, extreme depth inside the doorway, oppressive blackness, distorted pale silhouette, unsettling environmental horror, muted dirty beige, charcoal black and blue-gray tones, visually chilling and suspenseful, restrained body horror, no excessive gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_19",
+      prompt: "Same Emma’s bedroom. The father has suddenly stepped backward from the impossible doorway, his expression filled with shock, while the mother pulls Emma tightly against her and rushes toward the bedroom door. Behind them, the dark doorway in the wall is beginning to narrow by itself, its jagged edges slowly drawing together as if the wall is swallowing the opening. Just before it closes, a glimpse of the pale, distorted shape remains deep inside the darkness — barely visible, with several unnaturally long fingers pressed against the inner edge. Emma is still looking directly at it, completely calm, almost fascinated. The bedroom feels violently wrong despite everything being physically still. Loose papers and a few small toys on the floor appear slightly disturbed as if a cold force is being pulled toward the wall. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, deep oppressive blacks, distorted shadows stretching toward the wall, muted beige, charcoal black and blue-gray palette, intense supernatural horror, unsettling sense of something deliberately choosing when to appear, visually chilling, no excessive gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_20",
+      prompt: "Same bedroom, immediately after the doorway has disappeared. The father and mother are desperately repairing the damaged wall, covering the long vertical crack with rough wooden boards and fresh plaster. The mother kneels beside the wall holding Emma close against her, while Emma stares silently over her mother’s shoulder at the repaired section. The father is hammering a wooden board into place, his face tense and exhausted. The wall looks damaged and freshly patched, with deep scratch marks and faint blood stains still visible around the edges. Nothing supernatural is visibly present, but a very subtle dark shadow remains beneath the new plaster, almost as if something is still trapped behind it. Emma’s expression remains strangely calm. The room should feel like the family is desperately trying to convince themselves that everything is normal again. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic composition, muted beige, brown and blue-gray tones, oppressive shadows, psychological horror, subtle supernatural suggestion, realistic emotional reactions, no visible monster, no excessive gore, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_21",
+      prompt: "The same family arriving at a new suburban house one week later, daytime but under an overcast gray sky. Their belongings are being carried inside, cardboard boxes stacked near the entrance, but the mood is noticeably tense rather than hopeful. The mother keeps one protective hand on Emma’s shoulder while the father carries boxes toward the doorway. Emma stands quietly beside them, staring at the new house with a blank, distant expression. The new house looks clean and ordinary, yet one upstairs bedroom window appears unnaturally dark despite the daylight. In the foreground, the mother glances back toward the road as if afraid they are being followed. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic environmental storytelling, muted gray and desaturated beige tones, subtle oppressive atmosphere, psychological horror, no visible supernatural creature, no gore, realistic family proportions, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_22",
+      prompt: "Interior of the family’s new house at night. Emma stands alone in the corner of her new bedroom, facing a completely different wall, repeating the exact same unnatural posture from the first house. The room is still mostly unpacked, with a few cardboard boxes, a small bed, and scattered belongings visible. Cold moonlight enters through the window, while the hallway behind her is almost completely dark. Emma's back is toward the viewer, her head slightly tilted toward the wall as if she is listening to something on the other side. The mother is faintly visible standing in the hallway, watching Emma from a distance with growing fear and disbelief, realizing that the behavior has followed them. The new wall appears perfectly intact, but a subtle dark vertical shadow is visible behind Emma, barely distinguishable from the normal shadows. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, deep oppressive shadows, muted blue-gray, charcoal and faded beige tones, psychological horror, eerie repetition, unsettling supernatural atmosphere, no creature visible, no gore, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_23",
+      prompt: "Interior of Emma’s new bedroom at night. Emma stands in the same corner facing the wall, but this time her head is slightly tilted upward as if she is listening to a voice coming from inside it. Her lips are barely parted, suggesting she is quietly speaking to someone who cannot be seen. The mother stands just outside the bedroom doorway, watching in complete silence, her face tense with growing dread. The room is still partly unpacked, with boxes and toys scattered around, creating a contrast between an ordinary new home and the disturbing repetition. The wall directly in front of Emma appears completely normal, but a faint, almost imperceptible dark moisture-like stain has begun forming behind her hand. The shadow beneath the bed stretches slightly farther than the bed itself, subtly suggesting something is present in the room. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, deep oppressive shadows, muted blue-gray and faded beige tones, eerie psychological horror, slow-building supernatural dread, subtle environmental abnormalities, no visible creature, no gore, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_24",
+      prompt: "Interior of Emma’s new bedroom at night. Emma has slowly turned away from the wall and is now facing her mother in the doorway. Her small body remains unnaturally still, but her face has changed dramatically: her eyes are completely black, appearing like two deep empty pits with no visible pupils, whites, or reflections. Her expression is calm and emotionless, almost doll-like. Her mother stands frozen in the doorway, one hand gripping the doorframe, staring at Emma in terror. Emma’s fingers remain pressed against the wall behind her, and faint dark veins or hairline cracks are beginning to spread across the wall around her hand. The room is extremely dark, with a narrow beam of cold moonlight illuminating Emma’s distorted face while the rest of the room disappears into heavy shadow. The horror should come primarily from Emma’s unnatural eyes and completely calm expression. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, cinematic horror composition, dramatic close-to-medium framing, deep blacks, muted blue-gray and faded beige tones, disturbing child horror, intense psychological dread, visually chilling, no gore, no exaggerated monster body, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_25",
+      prompt: "Interior of Emma’s new bedroom at night. Emma stands facing her mother, her eyes completely black and empty, her expression strangely calm. Her mother remains frozen in the doorway, terrified and unable to understand what she is seeing. Emma slowly lifts one hand from the wall and looks down at her own arm as if noticing something beneath her skin. Very faint dark branching lines are visible underneath the skin of her forearm, subtle and unnatural, like thin shadows moving beneath the surface. Emma looks back toward her mother and quietly opens her mouth as if speaking. The wall behind Emma now has a barely noticeable dark stain spreading outward from where her hand was touching it. The bedroom remains mostly swallowed by darkness, with cold moonlight illuminating Emma and a narrow strip of warm hallway light behind her mother. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic horror composition, psychological dread, disturbing child horror, subtle supernatural elements, no gore, no monster visible, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_26",
+      prompt: "Interior of Emma’s new bedroom at night. Emma stands motionless in the center of the room, facing her mother. Her eyes remain completely black and empty, while her face stays unnaturally calm. Her mother slowly steps into the bedroom, visibly frightened, one hand extended toward Emma as if trying to comfort her. Emma tilts her head slightly toward the wall beside her, listening to something the mother cannot hear. The dark branching marks beneath Emma’s forearm are now slightly more visible, but still subtle and skin-like. From behind Emma, the wall appears to have a very faint inward bulge, almost as if something on the other side is pressing against it. A few tiny cracks spread across the paint. Emma’s lips begin to move as though answering a voice coming from inside the wall. The mother looks toward the wall with growing fear. Cold moonlight cuts across the floor while the corners of the bedroom remain almost completely black. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic psychological horror composition, subtle supernatural dread, unsettling silence, no gore, no visible creature, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_27",
+      prompt: "Interior of Emma’s new bedroom at night. Emma stands perfectly still beside the wall, her eyes completely black, listening intently. Her mother has stepped farther into the room and is now staring at the wall behind Emma. The wall has developed a subtle, unnatural slow bulge inward and outward, as if something enormous is breathing behind it. The wallpaper and paint around the area slightly flex with each invisible breath. Emma gently places her palm against the bulging wall, completely calm, while her mother recoils in fear. The dark branching marks beneath Emma’s forearm are slightly more pronounced. A few tiny flakes of paint fall silently to the floor. Emma’s expression suggests she is listening to someone speaking through the wall. The room feels unnaturally compressed and claustrophobic, with the bed and furniture fading into deep darkness behind them. Cold moonlight illuminates Emma’s face and hand while the wall behind her remains almost black. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic psychological horror composition, intense claustrophobic dread, subtle supernatural horror, no gore, no visible creature, no exaggerated monster effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_28",
+      prompt: "Interior of Emma’s new bedroom at night. Emma keeps her palm pressed against the wall while the mother stands several feet behind her, terrified. The wall has stopped visibly bulging, but a small section of the paint has separated from the surface, forming a thin vertical opening just beneath Emma’s hand. Emma slowly leans her head toward the wall as if listening closely to a whisper coming from inside. Her completely black eyes remain fixed and emotionless. The mother takes one cautious step backward, realizing something is communicating with Emma. Emma’s other hand hangs loosely at her side, with faint dark branching lines still visible beneath her skin. A single small child’s toy lies on the floor near the wall, slightly turned toward Emma as though it has been moved. The bedroom is almost silent and unnaturally still, with cold moonlight cutting across the floor and deep shadows swallowing the corners. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic horror composition, escalating psychological dread, subtle supernatural horror, no gore, no visible creature, no exaggerated monster effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_29",
+      prompt: "Interior of Emma’s new bedroom at night. Emma stands with her palm pressed against the thin vertical opening in the wall. Her completely black eyes stare directly at her mother, while her expression remains disturbingly peaceful. Suddenly, the wall beside Emma shows several subtle finger-shaped depressions from the inside, pressing outward through the wallpaper one after another. The mother notices them and instinctively covers her mouth, terrified. Emma does not react at all, as though she expected it. A faint dark line spreads upward from the opening toward the ceiling, while tiny pieces of cracked paint fall onto the floor. The mother begins backing toward the bedroom door, never taking her eyes off the wall. The room feels unnaturally cold and silent, with the only illumination coming from pale moonlight and a weak hallway glow. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic horror composition, escalating psychological dread, disturbing supernatural presence without revealing the creature, no gore, no explicit monster, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_30",
+      prompt: "Interior of Emma’s new bedroom at night. Emma remains beside the wall with one hand resting against the narrow opening, her eyes completely black and empty. The mother turns toward the bedroom doorway, intending to escape, but suddenly freezes: the doorway is no longer there. The wall where the door should be is completely solid and unbroken, blending seamlessly into the surrounding wallpaper. The mother reaches toward the wall in disbelief, desperately searching for the door handle that no longer exists. Behind her, Emma remains perfectly calm, still facing the wall. The thin opening beside Emma has grown slightly taller, and faint darkness leaks from it onto the floor like a narrow shadow. The mother’s face shows pure panic while Emma’s expression remains emotionless. The room feels sealed and claustrophobic, with cold moonlight illuminating the trapped mother and deep black shadows surrounding Emma. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic psychological horror composition, intense claustrophobic dread, escalating supernatural horror, no gore, no visible creature, no exaggerated monster effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_31",
+      prompt: "Interior of Emma’s new bedroom at night. The mother is pressed against the wall where the bedroom door used to be, desperately feeling along the surface for any opening, her face filled with panic. Behind her, the bedroom has subtly changed: the bed, furniture, and toys appear slightly farther away than they should be, making the room feel unnaturally long and distorted. Emma stands motionless beside the narrow black opening in the wall, her completely black eyes fixed on her mother. The opening has widened enough to reveal only absolute darkness beyond it, with no visible interior. The walls seem to lean inward toward Emma, creating a suffocating tunnel-like perspective. A child’s toy sits alone in the foreground, casting an impossibly long shadow toward the mother. Emma remains completely calm, almost as if she knows the room is no longer an ordinary room. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic wide-angle horror composition, intense claustrophobic psychological dread, subtle impossible-space distortion, no gore, no visible creature, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_32",
+      prompt: "Interior of Emma’s new bedroom at night. The mother is trapped against the wall where the doorway disappeared, desperately pushing against it with both hands. The room has become noticeably narrower, with the two side walls subtly bending inward toward Emma, creating the disturbing impression that the entire room is slowly closing around her. Emma stands calmly beside the dark opening, her completely black eyes fixed on her mother, one hand resting against the wall. The opening has stretched vertically from near the floor to above Emma’s head, revealing only absolute darkness. The bed and furniture appear compressed toward the center of the room, while the floorboards seem to converge unnaturally toward Emma. The mother looks terrified and breathless, realizing there is nowhere to escape. Emma remains completely emotionless, as though she is listening to something inside the walls. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic claustrophobic composition, intense psychological horror, disturbing impossible-space distortion, no gore, no visible creature, no exaggerated monster effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_33",
+      prompt: "Interior of Emma’s new bedroom at night. The mother remains trapped against the wall where the doorway disappeared, terrified and pounding against the solid surface. Emma slowly steps toward the tall black opening beside her. Her completely black eyes remain fixed forward, her face calm and emotionless. One bare foot is now crossing the threshold into the absolute darkness beyond the opening, while the rest of her small body remains visible in the bedroom. The darkness inside the opening appears impossibly deep, swallowing all light without revealing what lies beyond. The mother reaches toward Emma in desperation, silently trying to stop her. Emma does not look back. The walls of the room remain subtly curved inward, and the furniture seems unnaturally distant behind them. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic composition, intense psychological horror, disturbing supernatural atmosphere, strong contrast between cold moonlight and absolute black doorway, no gore, no visible creature, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_34",
+      prompt: "Interior of Emma’s new bedroom at night. Emma is now halfway through the tall black opening, with one leg and one arm disappearing into the absolute darkness beyond it. Her small body remains unnaturally calm, and her completely black eyes look back toward her mother for the first time. Her expression is not frightened—it carries a faint, unsettling sense of relief. The mother desperately reaches toward Emma from across the room, her fingers stretched out as if trying to grab her before she disappears. The darkness inside the opening seems to extend unnaturally around Emma’s body, almost wrapping around her like a silent void. The walls continue bending inward, while the furniture and toys appear farther away and distorted. A few loose papers on the floor are being slowly dragged toward the opening. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic wide composition, intense claustrophobic psychological horror, supernatural dread, impossible darkness, no gore, no visible creature, no exaggerated monster effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_35",
+      prompt: "Interior of Emma’s new bedroom at night. Emma is now almost completely swallowed by the tall black opening, with only her head, one shoulder, and one hand still visible from inside the bedroom. Her completely black eyes remain fixed on her mother, and her expression is eerily peaceful. The mother lunges forward with both arms extended, desperately trying to reach Emma, but she is still several feet away. The darkness around Emma seems to pull her deeper into the opening, while the edge of the doorway begins slowly narrowing around her body. The room is unnaturally distorted, the walls leaning inward and the floor stretching toward the opening. Emma’s abandoned toy lies in the foreground, completely still. The mother’s face shows overwhelming terror and helplessness. No creature is visible—only the impossible darkness consuming the child. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic wide-angle composition, intense psychological horror, heartbreaking supernatural dread, oppressive darkness, no gore, no visible monster, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_36",
+      prompt: "Interior of Emma’s new bedroom at night. Emma has completely disappeared into the darkness, leaving only the empty black opening in the wall. Her mother is on her knees directly in front of it, reaching desperately into the darkness with both hands, screaming silently in terror. The opening is now slowly narrowing, its jagged edges pulling inward as if the wall is healing itself. One tiny detail remains horrifying: Emma’s small handprint is visible on the inside edge of the darkness, as though she had tried to hold herself there before being pulled away. The mother stares at the handprint in disbelief. The bedroom furniture has returned almost to its normal position, but the room remains unnaturally dark and cold. Emma’s abandoned toy sits on the floor behind her mother. No creature is visible, only the shrinking black void. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic horror composition, intense emotional dread, supernatural psychological horror, eerie silence, no gore, no visible monster, no exaggerated effects, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    },
+    {
+      id: "scene_37",
+      prompt: "Interior of Emma’s new bedroom at night. The black opening has completely vanished, leaving behind an ordinary-looking wall. Emma’s mother remains kneeling against it, staring at the spot where her daughter disappeared. Her face is devastated and terrified. Suddenly, her expression changes as she hears something coming from inside the wall. She slowly presses one ear against the wall, holding her breath. On the other side, barely visible through the darkness of the room, the wall shows a faint impression resembling a small child’s face pressed from within, but only as a subtle distortion in the wallpaper, with no clear features. The mother’s eyes widen in horror. Emma’s abandoned toy sits on the floor behind her, casting a long shadow toward the wall. Dark hand-drawn 2D horror animation, sharp angular edges, rough imperfect ink outlines, uneven hand-drawn linework, gritty pencil-and-ink textures, limited-animation aesthetic, flat layered shading, deep shadows, muted blue-gray and faded beige tones, cinematic psychological horror composition, intimate claustrophobic framing, subtle supernatural horror, disturbing implication rather than explicit creature reveal, no gore, no exaggerated monster, not polished vector art, not smooth cartoon, not pixel art, not 3D, not photorealistic, widescreen 16:9."
+    }
+  ];
+
+  const RESULTS_KEY = "flow_scene_results_v1";
+  const MAX_SCENE_ATTEMPTS = 3;            // Automatically skips scene after 3 failed attempts
+  const GENERATE_START_DELAY_MS = 8000;
+  const POLL_INTERVAL_MS = 2000;
+  const POLL_MAX_TRIES = 35;
+  const STABLE_RECHECKS = 2;
+  const STABLE_RECHECK_DELAY_MS = 1800;
+  const RETRY_DELAY_MS = 6000;
+  const MIN_TILE_WIDTH = 220;
+  const MIN_TILE_HEIGHT = 130;
+
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  function loadResults() {
+    try {
+      return JSON.parse(localStorage.getItem(RESULTS_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  function saveResults(results) {
+    localStorage.setItem(RESULTS_KEY, JSON.stringify(results));
+  }
+
+  function downloadResultsSummary(results) {
+    const blob = new Blob([JSON.stringify(results, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "flow_results.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  function findInputElement() {
+    return (
+      document.querySelector('div[contenteditable="true"]') ||
+      document.querySelector("textarea") ||
+      document.querySelector('[role="textbox"]')
+    );
+  }
+
+  function injectTextReal(el, text) {
+    el.focus();
+    el.click();
+
+    const proto = el.isContentEditable
+      ? window.HTMLElement.prototype
+      : window.HTMLTextAreaElement.prototype || window.HTMLInputElement.prototype;
+    const desc = Object.getOwnPropertyDescriptor(proto, "value");
+    if (desc && desc.set) {
+      desc.set.call(el, text);
+    } else {
+      el.innerText = text;
+    }
+
+    el.dispatchEvent(new Event("focus", { bubbles: true }));
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "insertText", data: text }));
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: text }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: " ", code: "Space", bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: " ", code: "Space", bubbles: true }));
+  }
+
+  function triggerSubmit(el) {
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keypress", { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true }));
+  }
+
+  function getAllDeepElements(root = document.body) {
+    let elements = [];
+    const walk = (node) => {
+      if (!node) return;
+      elements.push(node);
+      if (node.shadowRoot) walk(node.shadowRoot);
+      for (const child of node.children || []) walk(child);
+    };
+    walk(root);
+    return elements;
+  }
+
+  function isLikelyPlaceholder(el, src) {
+    if (src && src.startsWith("data:")) return true;
+
+    const style = window.getComputedStyle(el);
+    if (style.filter && style.filter !== "none" && /blur/i.test(style.filter)) return true;
+
+    let parent = el.parentElement;
+    let depth = 0;
+    while (parent && depth < 4) {
+      const pStyle = window.getComputedStyle(parent);
+      if (pStyle.filter && /blur/i.test(pStyle.filter)) return true;
+      const cls = (parent.className || "").toString();
+      if (/placeholder|skeleton|shimmer|blurhash/i.test(cls)) return true;
+      parent = parent.parentElement;
+      depth++;
+    }
+
+    const cls = (el.className || "").toString();
+    if (/placeholder|skeleton|shimmer|blurhash/i.test(cls)) return true;
+
+    return false;
+  }
+
+  function getTopLeftTile() {
+    const allEls = getAllDeepElements();
+    const mediaCandidates = [];
+
+    for (const el of allEls) {
+      if (!el.getBoundingClientRect) continue;
+      const rect = el.getBoundingClientRect();
+      const inSidebar = el.closest("aside") || el.closest('[class*="dock"]') || el.closest('[class*="chat"]');
+      if (inSidebar) continue;
+      if (rect.width < MIN_TILE_WIDTH || rect.height < MIN_TILE_HEIGHT) continue;
+
+      if (el.tagName === "IMG" && el.src) {
+        if (isLikelyPlaceholder(el, el.src)) continue;
+        if (!el.complete || el.naturalWidth < MIN_TILE_WIDTH) continue;
+        mediaCandidates.push({ el, src: el.src, rect, type: "img" });
+      } else if (el.tagName === "CANVAS") {
+        if (el.width < MIN_TILE_WIDTH || el.height < MIN_TILE_HEIGHT) continue;
+        mediaCandidates.push({ el, rect, type: "canvas" });
+      } else {
+        const bg = window.getComputedStyle(el).backgroundImage;
+        if (bg && bg.includes("url(")) {
+          const m = bg.match(/url\(["']?(.*?)["']?\)/);
+          if (m && m[1] && !isLikelyPlaceholder(el, m[1])) {
+            mediaCandidates.push({ el, src: m[1], rect, type: "bg" });
+          }
+        }
+      }
+    }
+
+    if (mediaCandidates.length === 0) return null;
+
+    mediaCandidates.sort((a, b) => {
+      if (Math.abs(a.rect.top - b.rect.top) > 50) return a.rect.top - b.rect.top;
+      return a.rect.left - b.rect.left;
+    });
+
+    return mediaCandidates[0];
+  }
+
+  async function waitForStableNewTile(initialKey) {
+    let candidate = null;
+    let stableHits = 0;
+
+    for (let i = 1; i <= POLL_MAX_TRIES; i++) {
+      await delay(POLL_INTERVAL_MS);
+      const tile = getTopLeftTile();
+      const key = tile ? tile.src || "canvas_element" : null;
+
+      if (tile && key !== initialKey) {
+        if (candidate && candidate.key === key) {
+          stableHits++;
+        } else {
+          candidate = { tile, key };
+          stableHits = 1;
+        }
+
+        if (stableHits >= STABLE_RECHECKS) {
+          await delay(STABLE_RECHECK_DELAY_MS);
+          const confirmTile = getTopLeftTile();
+          const confirmKey = confirmTile ? confirmTile.src || "canvas_element" : null;
+          if (confirmKey === key) {
+            return confirmTile;
+          }
+          candidate = null;
+          stableHits = 0;
+        }
+      } else {
+        console.log(`  ...waiting for tile render (${i}/${POLL_MAX_TRIES})`);
+      }
+    }
+    return null;
+  }
+
+  function triggerBlobDownload(blob, filename) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  async function tryFetchDownload(url, filename, credentials) {
+    const res = await fetch(url, { credentials });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    if (blob.size < 3000) throw new Error(`Blob size ${blob.size} bytes — error or placeholder.`);
+    if (blob.type && !blob.type.startsWith("image/") && blob.type !== "application/octet-stream") {
+      throw new Error(`Blob type "${blob.type}" is not an image.`);
+    }
+    triggerBlobDownload(blob, filename);
+    return true;
+  }
+
+  async function tryCanvasReRender(url, filename) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth || 1280;
+          canvas.height = img.naturalHeight || 720;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((b) => {
+            if (!b) return resolve(false);
+            triggerBlobDownload(b, filename);
+            resolve(true);
+          }, "image/png");
+        } catch (err) {
+          resolve(false);
+        }
+      };
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  }
+
+  async function downloadMasterImage(tile, filename) {
+    if (tile.type === "canvas") {
+      try {
+        const dataUrl = tile.el.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return true;
+      } catch (err) {
+        console.warn(`Canvas export failed: ${err.message}`);
+      }
+    }
+
+    const url = tile.src;
+    if (!url) return false;
+
+    if (url.startsWith("blob:")) {
+      try {
+        return await tryFetchDownload(url, filename, "same-origin");
+      } catch (err) {}
+    }
+
+    const attempts = [
+      () => tryFetchDownload(url, filename, "include"),
+      () => tryFetchDownload(url, filename, "omit"),
+    ];
+
+    for (const attemptFn of attempts) {
+      try {
+        const ok = await attemptFn();
+        if (ok) return true;
+      } catch (err) {}
+    }
+
+    const canvasOk = await tryCanvasReRender(url, filename);
+    if (canvasOk) return true;
+
+    return false;
+  }
+
+  // ---------------------------------------------------------------------
+  // SCENE EXECUTION (WITH AUTO-SKIP)
+  // ---------------------------------------------------------------------
+  async function processScene(sceneId, promptText) {
+    let attempt = 0;
+
+    while (attempt < MAX_SCENE_ATTEMPTS) {
+      attempt++;
+      console.log(`%c[${sceneId}] Attempt ${attempt}/${MAX_SCENE_ATTEMPTS}`, "color:#00e5ff;font-weight:bold;");
+
+      const initialTile = getTopLeftTile();
+      const initialKey = initialTile ? initialTile.src || "initial_element" : null;
+
+      const input = findInputElement();
+      if (!input) {
+        console.error(`[${sceneId}] Input box missing. Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+        await delay(RETRY_DELAY_MS);
+        continue;
+      }
+
+      injectTextReal(input, promptText);
+      await delay(1000);
+      triggerSubmit(input);
+      console.log(`[${sceneId}] Submitted prompt. Waiting for tile...`);
+
+      await delay(GENERATE_START_DELAY_MS);
+
+      const finalTile = await waitForStableNewTile(initialKey);
+      if (!finalTile) {
+        console.warn(`[${sceneId}] No stable tile found on attempt ${attempt}.`);
+        await delay(RETRY_DELAY_MS);
+        continue;
+      }
+
+      const DOWNLOAD_RETRIES = 3;
+      let downloaded = false;
+      let currentTile = finalTile;
+
+      for (let d = 1; d <= DOWNLOAD_RETRIES; d++) {
+        downloaded = await downloadMasterImage(currentTile, `${sceneId}.png`);
+        if (downloaded) break;
+        await delay(2000);
+        const refreshed = getTopLeftTile();
+        if (refreshed) currentTile = refreshed;
+      }
+
+      if (downloaded) {
+        console.log(`%c[${sceneId}] Successfully generated and saved!`, "color:#00ff88;font-weight:bold;");
+        return true;
+      }
+
+      console.warn(`[${sceneId}] Download failed on attempt ${attempt}.`);
+      await delay(RETRY_DELAY_MS);
+    }
+
+    // Exceeded max attempts: Skip scene
+    console.error(`%c[${sceneId}] FAILED after ${MAX_SCENE_ATTEMPTS} attempts. Skipping to next scene...`, "color:#ff4444;font-weight:bold;");
+    return false;
+  }
+
+  // ---------------------------------------------------------------------
+  // MAIN PIPELINE
+  // ---------------------------------------------------------------------
+  const results = loadResults();
+
+  for (const { id, prompt } of SCENES) {
+    if (results[id]?.status === "done") {
+      console.log(`[${id}] Already done — skipping.`);
+      continue;
+    }
+
+    if (results[id]?.status === "failed") {
+      console.warn(`[${id}] Previously marked failed — skipping.`);
+      continue;
+    }
+
+    const success = await processScene(id, prompt);
+    if (success) {
+      results[id] = { status: "done", completedAt: new Date().toISOString() };
+    } else {
+      results[id] = { status: "failed", failedAt: new Date().toISOString() };
+    }
+    saveResults(results);
+
+    await delay(2500);
+  }
+
+  console.log("%c🏁 Process finished for all available scenes.", "color:#00ff88;font-weight:bold;font-size:16px;");
+  downloadResultsSummary(results);
+})();

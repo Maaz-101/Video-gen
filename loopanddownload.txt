@@ -1,0 +1,160 @@
+(async function extractPromptsPipeline() {
+  const prompts = [];
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  let sceneIndex = 1;
+
+  window.stopExtraction = false;
+  window.stopScript = function () {
+    console.log("%c🛑 Stop Triggered!", "color: #ff3333; font-weight: bold;");
+    window.stopExtraction = true;
+  };
+
+  const escListener = (e) => {
+    if (e.key === 'Escape') {
+      console.log("%c🛑 ESC Pressed! Saving captured prompts...", "color: #ff3333; font-weight: bold;");
+      window.stopExtraction = true;
+    }
+  };
+  window.addEventListener('keydown', escListener);
+
+  function getInputElement() {
+    return document.querySelector('#prompt-textarea') || 
+           document.querySelector('textarea') || 
+           document.querySelector('div[contenteditable="true"]');
+  }
+
+  function getSendButton() {
+    return document.querySelector('button[data-testid="send-button"]') || 
+           document.querySelector('button[aria-label*="Send"]');
+  }
+
+  function isGenerating() {
+    return !!(document.querySelector('button[data-testid="stop-button"]') || 
+              document.querySelector('button[aria-label*="Stop"]'));
+  }
+
+  function parsePrompt(msgElement) {
+    if (!msgElement) return null;
+
+    // 1. Check code / pre tags
+    const codeBlocks = msgElement.querySelectorAll('pre, code, div[class*="code"]');
+    for (const block of codeBlocks) {
+      const text = block.innerText.trim();
+      if (text.includes('16:9') || text.length > 50) return text;
+    }
+
+    // 2. Fallback: match 16:9 prompt pattern in text
+    const fullText = msgElement.innerText.trim();
+    const match = fullText.match(/(16:9\s+cinematic[\s\S]*?(?:No\s+watermark\.?|$))/i);
+    if (match && match[1] && match[1].length > 40) return match[1].trim();
+
+    // 3. Fallback: if the response itself is primarily the prompt
+    if (fullText.length > 60 && !fullText.toLowerCase().startsWith('sure') && !fullText.toLowerCase().startsWith('here')) {
+      return fullText;
+    }
+
+    return null;
+  }
+
+  function getAssistantMessages() {
+    return Array.from(document.querySelectorAll('div[data-message-author-role="assistant"]'));
+  }
+
+  console.log("%c🚀 Checking on-screen messages for Scene 1...", "color: #10a37f; font-weight: bold; font-size: 14px;");
+
+  // --- STEP 1: CAPTURE SCENE 1 CURRENTLY VISIBLE ON SCREEN ---
+  const initialMessages = getAssistantMessages();
+  if (initialMessages.length > 0) {
+    const lastMsg = initialMessages[initialMessages.length - 1];
+    const initialPrompt = parsePrompt(lastMsg);
+    if (initialPrompt) {
+      const id = `scene_${String(sceneIndex).padStart(2, '0')}`;
+      prompts.push({ id, prompt: initialPrompt });
+      console.log(`%c[${id}] Captured Scene 1 directly from screen!`, "color: #00ff88; font-weight: bold;");
+      sceneIndex++;
+    } else {
+      console.warn("Could not parse prompt from current screen. Proceeding with 'next'...");
+    }
+  }
+
+  // --- STEP 2: LOOP TO AUTOMATE "NEXT" FOR REMAINING SCENES ---
+  while (!window.stopExtraction) {
+    const sceneId = `scene_${String(sceneIndex).padStart(2, '0')}`;
+    console.log(`Sending "next" for ${sceneId}...`);
+
+    const inputEl = getInputElement();
+    if (!inputEl) {
+      console.error("Input box not found.");
+      break;
+    }
+
+    inputEl.focus();
+    if (inputEl.tagName.toLowerCase() === 'textarea') {
+      inputEl.value = 'next';
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      inputEl.innerText = 'next';
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    await delay(500);
+    if (window.stopExtraction) break;
+
+    const sendBtn = getSendButton();
+    if (sendBtn && !sendBtn.disabled) {
+      sendBtn.click();
+    } else {
+      inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+    }
+
+    await delay(1500);
+
+    // Wait until response generation is complete
+    while (isGenerating() && !window.stopExtraction) {
+      await delay(1000);
+    }
+
+    if (window.stopExtraction) break;
+    await delay(1500);
+
+    const currentMessages = getAssistantMessages();
+    if (currentMessages.length === 0) break;
+
+    const latestMsg = currentMessages[currentMessages.length - 1];
+    const latestText = latestMsg.innerText;
+
+    // Check for story conclusion
+    if (latestText.toLowerCase().includes('the end') || latestText.toLowerCase().includes('no more scenes')) {
+      console.log("%cEnd of script reached.", "color: #ffaa00; font-weight: bold;");
+      break;
+    }
+
+    const extracted = parsePrompt(latestMsg);
+    if (extracted) {
+      prompts.push({ id: sceneId, prompt: extracted });
+      console.log(`%c[${sceneId}] Captured successfully!`, "color: #00ff88; font-weight: bold;");
+      sceneIndex++;
+    } else {
+      console.warn(`Could not parse prompt for ${sceneId}. Stopping extraction.`);
+      break;
+    }
+
+    await delay(1800);
+  }
+
+  window.removeEventListener('keydown', escListener);
+
+  // --- STEP 3: AUTO-DOWNLOAD JSON ---
+  if (prompts.length > 0) {
+    console.log(`\n%c🎉 Done! Downloading ${prompts.length} prompts...`, "color: #10a37f; font-weight: bold; font-size: 15px;");
+    const blob = new Blob([JSON.stringify(prompts, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'prompts.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else {
+    console.warn("No prompts captured.");
+  }
+})();

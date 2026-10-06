@@ -1,0 +1,86 @@
+localStorage.removeItem("flow_scene_results_v1");
+
+Here are the exact step-by-step instructions to run your automation from a completely clean slate.
+
+---
+
+### Step 1: Clean & Copy Your Profile
+
+1. **Kill all active Chrome processes** (so no background locks interfere):
+```powershell
+Stop-Process -Name "chrome" -Force -ErrorAction SilentlyContinue
+
+```
+
+
+2. **Clean out the previous automation directory:**
+```powershell
+Remove-Item -Recurse -Force "C:\ChromeAutomation" -ErrorAction SilentlyContinue
+
+```
+
+
+3. **Run your profile copy script:**
+* Open your terminal in `C:\Users\Lenovo\Downloads\files` (or wherever your batch file lives) and run:
+```powershell
+.\copy-profile.bat
+
+```
+
+
+*(Or double-click `copy-profile.bat` directly in File Explorer).*
+
+
+
+---
+
+### Step 2: Launch Chrome in Debug Mode
+
+Run this PowerShell command to open Chrome using your clean automation copy listening on port `9222`:
+
+```powershell
+Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" -ArgumentList '--remote-debugging-port=9222', '--user-data-dir="C:\ChromeAutomation"', '--profile-directory="Profile 39"'
+
+```
+
+---
+
+### Step 3: Open Leonardo AI & Verify
+
+1. In the Chrome window that opens, navigate directly to:
+`[https://app.leonardo.ai/generate?model=lucid-origin](https://app.leonardo.ai/generate?model=lucid-origin)`
+2. Confirm that **Jintools** is active, you are logged in, and the prompt input box is visible on screen.
+
+---
+
+### Step 4: Verify Your Prompts File
+
+Make sure your `prompts.json` file exists in `C:\Users\Lenovo\Downloads\files\` and contains your array of prompts, for example:
+
+```json
+[
+  "A night time view outside a petrol pump mart, horror movie vibe, cinematic",
+  "Dark eerie forest road illuminated by neon streetlights, high detail"
+]
+
+```
+
+---
+
+### Step 5: Run the Automation Script
+
+Open PowerShell inside `C:\Users\Lenovo\Downloads\files\` and run:
+
+```powershell
+node 2-generate-automation.js
+
+```
+
+---
+
+### What Will Happen Next:
+
+1. The script attaches to your open Chrome window over CDP.
+2. It loops through `prompts.json`, types each prompt, and clicks **Generate**.
+3. It listens for the backend GraphQL response, handles queue delays automatically, waits for image completion, and saves the output directly to `C:\Users\Lenovo\Downloads\files\outputs\`.
+4. Progress is saved in `results.json` so you can resume anytime without re-generating completed prompts.

@@ -1,0 +1,56 @@
+[
+  {
+    "scene_id": 39,
+    "text": "They called the police and showed them everything they had found. The officers searched the hidden passage carefully, checking every opening and narrow section of the walls. At first, they didn't find anyone. Then one of the officers noticed something on the dusty floor.",
+    "speech_start": 0.0,
+    "speech_end": 19.056,
+    "scene_total_end": 20.856,
+    "speech_duration": 19.056,
+    "total_duration": 20.856
+  },
+  {
+    "scene_id": 40,
+    "text": "There were several cigarette butts lying near the back of the passage. They weren't old or covered in dust like everything else. Some of them looked like they had been smoked only recently. Beside them were a half-empty bottle of water and a few empty food wrappers.",
+    "speech_start": 20.856,
+    "speech_end": 39.168,
+    "scene_total_end": 40.968,
+    "speech_duration": 18.312,
+    "total_duration": 20.112
+  },
+  {
+    "scene_id": 41,
+    "text": "The police searched deeper and found a small blanket, an old flashlight, and a few personal belongings hidden behind one of the wall sections. Someone hadn't just discovered the passage. Someone had been using it. And judging by the fresh cigarette butts, they might have been there very recently.",
+    "speech_start": 40.968,
+    "speech_end": 62.256,
+    "scene_total_end": 64.056,
+    "speech_duration": 21.288,
+    "total_duration": 23.088
+  },
+  {
+    "scene_id": 42,
+    "text": "The officers searched the entire house again, but there was no sign of anyone. They checked the doors, windows, attic, basement, and every possible entrance. Whoever had been inside the passage was gone. The only thing they could confirm was that the person had known the house well enough to move through it without being seen.",
+    "speech_start": 64.056,
+    "speech_end": 87.768,
+    "scene_total_end": 89.568,
+    "speech_duration": 23.712,
+    "total_duration": 25.512
+  },
+  {
+    "scene_id": 43,
+    "text": "That was enough for them. The couple packed a few bags and left the house that same night. They didn't care about the furniture, the money they had spent on the place, or what would happen to the house afterward. They just wanted to be somewhere the walls couldn't hide anyone.",
+    "speech_start": 89.568,
+    "speech_end": 108.24,
+    "scene_total_end": 110.04,
+    "speech_duration": 18.672,
+    "total_duration": 20.472
+  },
+  {
+    "scene_id": 44,
+    "text": "They never moved back in. A few weeks later, they learned that the police still hadn't found the person who had been using the passage. The case was left open, but there was no name, no face, and no proof of who had been watching them.",
+    "speech_start": 110.04,
+    "speech_end": 127.416,
+    "scene_total_end": 127.416,
+    "speech_duration": 17.376,
+    "total_duration": 17.376
+  }
+]
